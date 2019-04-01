@@ -78,6 +78,44 @@ ws1.on("message", function incoming(data) {
   });
 });
 
+/**
+ * Allow CORS to work for every request.
+ * http://stackoverflow.com/a/13148080/135786
+ */
+app.use(function(req, res, next) {
+  var oneof = false;
+  if (req.headers.origin) {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+    oneof = true;
+  }
+  if (req.headers["access-control-request-method"]) {
+    res.header(
+      "Access-Control-Allow-Methods",
+      req.headers["access-control-request-method"]
+    );
+    oneof = true;
+  }
+  if (req.headers["access-control-request-headers"]) {
+    res.header(
+      "Access-Control-Allow-Headers",
+      req.headers["access-control-request-headers"]
+    );
+    oneof = true;
+  }
+  // if we don't have this, no other headers will show.
+  res.header("Access-Control-Expose-Headers", "Content-Type, Location");
+  if (oneof) {
+    res.header("Access-Control-Max-Age", 60 * 60 * 24 * 365);
+  }
+
+  // intercept OPTIONS method
+  if (oneof && req.method == "OPTIONS") {
+    res.send(200);
+  } else {
+    next();
+  }
+});
+
 app.get("/omni/:location", (req, res) => {
   const temp = req.params;
   const results = locationUpdate
