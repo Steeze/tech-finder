@@ -9,13 +9,13 @@ var locationUpdate = db.addCollection("locationUpdate");
 const WebSocket = require("ws");
 
 const ws = new WebSocket(
-  "ws://13.59.114.154:8003/ws?device=marks8&family=demo&encoding=text"
+  "ws://localhost:8003/ws?device=marks8&family=demo&encoding=text" //13.59.114.154
 );
 const ws1 = new WebSocket(
-  "ws://13.59.114.154:8003/ws?device=s5&family=demo&encoding=text"
+  "ws://13.59.114.154:8003/ws?device=s5&family=demo&encoding=text" // 13.59.114.154
 );
 const ws2 = new WebSocket(
-  "ws://13.59.114.154:8003/ws?device=brandon&family=demo&encoding=text"
+  "ws://13.59.114.154:8003/ws?device=brandon&family=demo&encoding=text" // 13.59.114.154
 );
 
 ws.on("message", function incoming(data) {
