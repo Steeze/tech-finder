@@ -110,10 +110,10 @@ function checkForUserNewEntry(location, user, time) {
         testEntry.time
       } to ${time}`
     );
-    locationUpdate
-      .chain()
-      .find({ user: `${user}` })
-      .remove();
+    locationUpdate.findAndRemove({ user: `${user}` });
+    // .chain()
+    // .find({ user: `${user}` })
+    // .remove();
   }
 }
 
