@@ -9,13 +9,13 @@ var locationUpdate = db.addCollection("locationUpdate");
 const WebSocket = require("ws");
 
 const ws = new WebSocket(
-  "ws://localhost:8003/ws?device=marks8&family=demo&encoding=text" //13.59.114.154
+  "ws://13.59.114.154:8003/ws?device=marks8&family=test2&encoding=text" //13.59.114.154 or localhost to deploy
 );
 const ws1 = new WebSocket(
   "ws://13.59.114.154:8003/ws?device=s5&family=demo&encoding=text" // 13.59.114.154
 );
 const ws2 = new WebSocket(
-  "ws://localhost:8003/ws?device=brandon&family=demo&encoding=text" // 13.59.114.154
+  "ws://13.59.114.154:8003/ws?device=brandon&family=test2&encoding=text" // 13.59.114.154
 );
 
 ws.on("message", function incoming(data) {
@@ -25,11 +25,15 @@ ws.on("message", function incoming(data) {
   const user = sensors.d;
   const probability = Math.round(guess.probability * 100);
 
+  // TODO : query if user is inserted, if so, is date greater?
+  checkForUserNewEntry(location, user, readableTime);
+
   console.log(
     `${readableTime} -- ${location} --  ${sensors.d} --  ${Math.round(
       guess.probability * 100
     )}`
   );
+
   locationUpdate.insert({
     user: user,
     omni: location,
@@ -44,6 +48,9 @@ ws2.on("message", function incoming(data) {
   const readableTime = new Date(time);
   const user = sensors.d;
   const probability = Math.round(guess.probability * 100);
+
+  // TODO : query if user is inserted, if so, is date greater?
+  checkForUserNewEntry(location, user, readableTime);
 
   console.log(
     `${readableTime} -- ${location} --  ${sensors.d} --  ${Math.round(
@@ -77,6 +84,38 @@ ws1.on("message", function incoming(data) {
     time: readableTime
   });
 });
+
+function checkForUserNewEntry(location, user, time) {
+  // TODO : query if user is inserted, if so, is date greater?
+  const entry = locationUpdate
+    .chain()
+    .find({ user: `${user}` })
+    .simplesort("time", { desc: true })
+    .data();
+
+  const testEntry = entry[0];
+
+  if (testEntry) {
+    console.log(
+      ` this is the entry ==>  ${testEntry.omni} -- ${testEntry.time} - ${
+        testEntry.user
+      }`
+    );
+  }
+
+  // check if location changed
+  if (testEntry && testEntry.omni !== location && testEntry.time < time) {
+    console.log(
+      `change for ${user} from ${testEntry.omni}  to  ${location}  or ${
+        testEntry.time
+      } to ${time}`
+    );
+    locationUpdate
+      .chain()
+      .find({ user: `${user}` })
+      .remove();
+  }
+}
 
 /**
  * Allow CORS to work for every request.
